@@ -10,7 +10,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Deploy to VPS
@@ -23,4 +23,18 @@ jobs:
           port: ${{ secrets.PORT }}
 
           script: |
-            echo "Connected to VPS"
+            cd /var/www/apps/vshri-express-api
+
+            git pull origin main
+
+            npm install
+
+            if pm2 describe vshri-api > /dev/null; then
+              pm2 restart vshri-api
+            else
+              pm2 start server.js --name vshri-api
+            fi
+
+            pm2 save
+
+            echo "Deployment completed successfully."
